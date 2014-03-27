@@ -3223,7 +3223,7 @@ zh2hans = {
 
 maxl = max(map(lambda x: len(x), zh2hans.keys()))
 
-
+#繁体转简体
 def transfer(sentence):
     ret = ""
     pos = 0

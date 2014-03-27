@@ -21,7 +21,7 @@ class TnT(object):
         self.l2 = 0.0
         self.l3 = 0.0
         self.status = set()
-        self.wd = frequency.AddOneProb()
+        self.wd = frequency.AddOneProb()    #词性，词的次数
         self.eos = frequency.AddOneProb()
         self.eosd = frequency.AddOneProb()
         self.uni = frequency.NormalProb()
@@ -30,6 +30,8 @@ class TnT(object):
         self.word = {}
         self.trans = {}
 
+
+    #保存到fname文件中
     def save(self, fname):
         d = {}
         for k, v in self.__dict__.items():
@@ -73,9 +75,9 @@ class TnT(object):
             self.uni.add('BOS', 2)
             for word, tag in sentence:
                 now.append(tag)
-                self.status.add(tag)
+                self.status.add(tag)    #一共多少词性
                 self.wd.add((tag, word), 1)
-                self.eos.add(tuple(now[1:]), 1)
+                self.eos.add(tuple(now[1:]), 1)#词性二元组出现次数
                 self.eosd.add(tag, 1)
                 self.uni.add(tag, 1)
                 self.bi.add(tuple(now[1:]), 1)
@@ -83,7 +85,7 @@ class TnT(object):
                 if word not in self.word:
                     self.word[word] = set()
                 self.word[word].add(tag)
-                now.pop(0)
+                now.pop(0)  #每次把尾端的词去掉
             self.eos.add((now[-1], 'EOS'), 1)
         tl1 = 0.0
         tl2 = 0.0
@@ -113,19 +115,18 @@ class TnT(object):
                                        self.bi.get((s1, s2))[1])
                     self.trans[(s1, s2, s3)] = log(uni+bi+tri)
 
-    def tag(self, data):
+    def tag(self, data):    #词的list
         now = [(('BOS', 'BOS'), 0.0, [])]
         for w in data:
             stage = {}
-            samples = self.status
+            samples = self.status   #词性集合
             if w in self.word:
                 samples = self.word[w]
             for s in samples:
-                wd = log(self.wd.get((s, w))[1])-log(self.uni.get(s)[1])
+                wd = log(self.wd.get((s, w))[1])-log(self.uni.get(s)[1])    #s词性中词w占的比例
                 for pre in now:
                     p = pre[1]+wd+self.trans[(pre[0][0], pre[0][1], s)]
-                    if (pre[0][1], s) not in stage or p > stage[(pre[0][1],
-                                                                 s)][0]:
+                    if (pre[0][1], s) not in stage or p > stage[(pre[0][1], s)][0]:
                         stage[(pre[0][1], s)] = (p, pre[2]+[s])
             stage = list(map(lambda x: (x[0], x[1][0], x[1][1]), stage.items()))
             now = heapq.nlargest(self.N, stage, key=lambda x: x[1])

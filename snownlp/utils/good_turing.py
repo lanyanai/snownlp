@@ -2,10 +2,11 @@
 from __future__ import print_function
 from __future__ import division
 from math import log, exp
+from functools import reduce
 
 def getz(r, nr):
     z = [2*nr[0]/r[1]]
-    for i in xrange(len(nr)-2):
+    for i in range(len(nr)-2):
         z.append(2*nr[i+1]/(r[i+2]-r[i]))
     z.append(nr[-1]/(r[-1]-r[-2]))
     return z
@@ -16,7 +17,8 @@ def least_square(x, y): # y=a+bx
     xy = sum((x[i]-meanx)*(y[i]-meany) for i in range(len(x)))
     square = sum((x[i]-meanx)**2 for i in range(len(x)))
     b = xy/square
-    return (meany-b*meanx, b)
+    return meany-b*meanx, b
+
 
 def main(dic):
     values = sorted(dic.values())
@@ -30,10 +32,10 @@ def main(dic):
     rr = dict(map(lambda x:list(reversed(x)), enumerate(r)))
     total = reduce(lambda x, y:(x[0]*x[1]+y[0]*y[1], 1), zip(nr, r))[0]
     z = getz(r, nr)
-    a, b = least_square(map(lambda x:log(x), r), map(lambda x:log(x), z))
+    a, b = least_square(list(map(lambda x:log(x), r)), list(map(lambda x:log(x), z)))
     use_good_turing = False
     nr.append(exp(a+b*log(r[-1]+1)))
-    for i in xrange(len(r)):
+    for i in range(len(r)):
         good_turing = (r[i]+1)*(exp(b*(log(r[i]+1)-log(r[i]))))
         turing = (r[i]+1)*nr[i+1]/nr[i] if i+1<len(r) else good_turing
         diff = ((((r[i]+1)**2)/nr[i]*nr[i+1]/nr[i]*(1+nr[i+1]/nr[i]))**0.5)*1.65

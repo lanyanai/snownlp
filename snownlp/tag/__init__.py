@@ -14,7 +14,7 @@ tagger.load(data_path)
 
 def train(file_name):
     fr = codecs.open(file_name, 'r', 'utf-8')
-    data = []
+    data = []#list，每项为词，tag
     for i in fr:
         line = i.strip()
         if not line:
@@ -31,3 +31,4 @@ def tag_all(words):
 
 def tag(words):
     return map(lambda x: x[1], tag_all(words))
+
